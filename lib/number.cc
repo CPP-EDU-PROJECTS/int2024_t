@@ -3,6 +3,7 @@
 #include <string>
 #include <cstring>
 #include <cmath>
+#define debug(x) std::cerr << (#x) << " = " << x << "\n"
 
 int2024_t from_int(long long i) {
     int2024_t number;
@@ -38,13 +39,48 @@ int2024_t from_string(const char* buff) {
 }
 
 int2024_t operator+(const int2024_t& lhs, const int2024_t& rhs) {
-    
-    return int2024_t();
+    short extra = 0;
+    int2024_t res;
+    for (int i = 252;  i >= 0; i--) {
+        int c = lhs.number[i] + rhs.number[i] + extra;
+        extra = 0;
+        res.number[i] = c % 256;
+        extra = c / 256;
+    }
+    return res;
+}
+int2024_t operator-(const int2024_t& lhs, const int2024_t& rhs) {
+    short extra = 0;
+    short tmp = 0;
+    int2024_t res;
+    for (int i = 252;  i >= 0; i--) {
+        bool is_less = false;
+        tmp = lhs.number[i];
+        if (lhs.number[i] < rhs.number[i]){
+            tmp += 256;
+            is_less = true;
+        } 
+        res.number[i] = tmp - rhs.number[i] - extra;
+        
+        // debug((int)is_less);
+        // debug(tmp);
+        // debug((int)lhs.number[i] );
+        // debug((int)rhs.number[i] );
+        // debug(extra );
+        // debug((int)res.number[i]);
+        extra = is_less;
+    }
+
+    return res;
 }
 
-int2024_t operator-(const int2024_t& lhs, const int2024_t& rhs) {
-    return int2024_t();
+int2024_t int2024_t::operator-() {
+    char mask = 128;
+    number[0] ^= mask;
+    
+    return *this;
 }
+
 
 int2024_t operator*(const int2024_t& lhs, const int2024_t& rhs) {
     return int2024_t();

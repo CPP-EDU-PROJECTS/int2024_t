@@ -3,8 +3,9 @@
 #include <iostream>
 
 struct int2024_t {
-    char number[253]{};
+    unsigned char number[253]{};
     friend std::ostream& operator<<(std::ostream& stream, const int2024_t& value);
+    int2024_t operator-();
 };
 
 static_assert(sizeof(int2024_t) <= 253, "Size of int2024_t must be no higher than 253 bytes");
