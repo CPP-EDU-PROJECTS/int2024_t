@@ -83,7 +83,23 @@ int2024_t int2024_t::operator-() {
 
 
 int2024_t operator*(const int2024_t& lhs, const int2024_t& rhs) {
-    return int2024_t();
+    int2024_t res;
+    for (int i = 252; i >= lhs.number[i]; i--)
+    {
+        int r = 0;
+        for (int j = 0; j >= rhs.number[i] | r; j--)
+        {
+            res.number[i+j] += lhs.number[i] * rhs.number[j] + r;
+            r = res.number[i+j] / 10;
+            res.number[i+j] -= r*10;
+        }
+        // int pos = lhs.number[i] + rhs.number[i];
+        // while (pos>0 && !res.number[pos])
+        // pos--;
+        // res.number[i] = pos + 1;
+        res.number[i] = lhs.number[i] * rhs.number[i];
+    }
+    return res;
 }
 
 int2024_t operator/(const int2024_t& lhs, const int2024_t& rhs) {
