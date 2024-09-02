@@ -5,6 +5,10 @@
 #include <cmath>
 #define debug(x) std::cerr << (#x) << " = " << x << "\n"
 
+bool IsNeg(int2024_t x) {
+    return x.number[0] >= 128;
+}
+
 int2024_t from_int(long long i) {
     int2024_t number;
     if(i < 0) {
@@ -36,6 +40,58 @@ int2024_t from_string(const char* buff) {
         id--;
     }
     return number;
+}
+
+bool operator<=(const int2024_t& lhs, const int2024_t& rhs) {
+    if (lhs == rhs) {
+        return true;
+    }
+
+    if (IsNeg(lhs)) {
+        if (!IsNeg(rhs)) {
+            return true;
+        }
+        for (int i = 0; i < 253; ++i) {
+            if (lhs.number[i] < rhs.number[i]) {
+                return true;
+            }
+            if (rhs.number[i] < lhs.number[i]) {
+                return false;
+            }
+        }
+    } else {
+        if (IsNeg(rhs)) {
+            return false;
+        } 
+        for (int i = 0; i < 253; ++i) {
+            if (lhs.number[i] < rhs.number[i]) {
+                return true;
+            }
+            if (rhs.number[i] < lhs.number[i]) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool operator==(const int2024_t& lhs, const int2024_t& rhs) {
+    for (int i = 0; i < 253; i++){
+        if(lhs.number[i] != rhs.number[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool operator!=(const int2024_t& lhs, const int2024_t& rhs) {
+    for (int i = 0; i < 253; i++){
+        if(lhs.number[i] == rhs.number[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 int2024_t operator+(const int2024_t& lhs, const int2024_t& rhs) {
@@ -75,7 +131,7 @@ int2024_t operator-(const int2024_t& lhs, const int2024_t& rhs) {
 }
 
 int2024_t int2024_t::operator-() {
-    char mask = 128;
+    unsigned char mask = 128;
     number[0] ^= mask;
     
     return *this;
@@ -83,35 +139,69 @@ int2024_t int2024_t::operator-() {
 
 
 int2024_t operator*(const int2024_t& lhs, const int2024_t& rhs) {
-    int2024_t res;
-    for (int i = 252; i >= lhs.number[i]; i--)
+    int2024_t res1;
+    bool need_inv = IsNeg(lhs) ^ IsNeg(rhs);
+
+    for (int i = 252; i >= 0; i--)
     {
+        int2024_t res;
         int r = 0;
-        for (int j = 0; j >= rhs.number[i] | r; j--)
+        for (int j = 252; j >= 0; j--)
         {
-            res.number[i+j] += lhs.number[i] * rhs.number[j] + r;
-            r = res.number[i+j] / 10;
-            res.number[i+j] -= r*10;
+            if (253 > i + j - 253 + 1  && i + j - 253 + 1 >= 0) {
+                short t = 0;
+                t += lhs.number[i] * rhs.number[j] + r;
+                r = t / 256;
+                res.number[i + j - 253 + 1] = static_cast<char>(t);
+            }
         }
-        // int pos = lhs.number[i] + rhs.number[i];
-        // while (pos>0 && !res.number[pos])
-        // pos--;
-        // res.number[i] = pos + 1;
-        res.number[i] = lhs.number[i] * rhs.number[i];
+        res1 = res1 + res;
     }
-    return res;
+
+    if(need_inv) {
+        res1 = -res1;
+    }
+
+    return res1;
 }
 
 int2024_t operator/(const int2024_t& lhs, const int2024_t& rhs) {
-    return int2024_t();
-}
+    int2024_t res;
+    bool need_inv = IsNeg(lhs) ^ IsNeg(rhs);
 
-bool operator==(const int2024_t& lhs, const int2024_t& rhs) {
-    return false;
-}
+    int2024_t a = lhs;
+    int2024_t b = rhs;
 
-bool operator!=(const int2024_t& lhs, const int2024_t& rhs) {
-    return false;
+    if (IsNeg(a)) {
+        a = -a;
+    }
+    if (IsNeg(b)) {
+        b = -b;
+    }
+
+    int2024_t cur;
+    for (int i = 0; i < 253; ++i) {
+        cur = cur * from_int(256);
+        cur = cur + from_int(a.number[i]);
+        int l = 0, r = 256;
+
+        int tmp = r - 1;
+        for (int m = r - 1; m >= l; --m) {
+            if (b * from_int(m) <= cur) {
+                tmp = m;
+                break;
+            }
+        }
+
+        res.number[i] = tmp;
+        cur = cur - b * from_int(tmp);
+    }
+
+    if (need_inv) {
+        res = -res;
+    }
+
+    return res;
 }
 
 std::ostream& operator<<(std::ostream& stream, const int2024_t& value) {

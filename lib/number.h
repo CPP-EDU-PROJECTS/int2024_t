@@ -26,4 +26,6 @@ bool operator==(const int2024_t& lhs, const int2024_t& rhs);
 
 bool operator!=(const int2024_t& lhs, const int2024_t& rhs);
 
+bool operator<=(const int2024_t& lhs, const int2024_t& rhs);
+
 std::ostream& operator<<(std::ostream& stream, const int2024_t& value);
